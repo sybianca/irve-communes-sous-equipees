@@ -1,0 +1,20 @@
+# dépendances
+/node_modules
+
+# build Next.js
+/.next/
+/out/
+
+# données : cache et base générée non versionnés (le jeu de secours data/fallback/ est versionné)
+/data/cache/
+/data/*.duckdb
+/data/*.duckdb.wal
+
+# divers
+*.tsbuildinfo
+.env*
+!.env.example
+.DS_Store
+
+# outillage local (Vibe CLI)
+/.vibe/

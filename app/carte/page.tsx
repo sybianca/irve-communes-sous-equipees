@@ -11,49 +11,23 @@ export default function CartePage() {
   useEffect(() => {
     async function loadDataAndInit() {
       try {
-        // Charger les données via l'API (DuckDB local ou fallback)
+        // 1. Charger Leaflet CSS et JS si ce n'est pas déjà fait
+        await loadLeaflet();
+
+        // 2. Charger les données via l'API
         const response = await fetch('/api/communes');
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.error || data.hint || 'Erreur de chargement');
+          throw new Error(data.error || data.hint || 'Erreur de chargement des données');
         }
         const data = await response.json();
         setCommunes(data);
 
-        // Attendre que Leaflet soit chargé
-        // @ts-ignore - L est global après chargement via script tag
-        if (typeof window !== 'undefined' && typeof (window as any).L === 'undefined') {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.body.appendChild(script);
-          });
-        }
+        // 3. Attendre que l'élément map existe
+        await waitForMapElement();
 
-        // Vérifier que l'élément map existe
-        let mapElement = document.getElementById('map');
-        let retries = 0;
-        const maxRetries = 20;
-        
-        while (!mapElement && retries < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 50));
-          mapElement = document.getElementById('map');
-          retries++;
-        }
-
-        if (!mapElement) {
-          throw new Error('Map container not found');
-        }
-
-        // @ts-ignore
-        if (typeof L === 'undefined') {
-          throw new Error('Leaflet not loaded');
-        }
-
-        // Initialiser la carte
-        // @ts-ignore
+        // 4. Initialiser la carte
+        // @ts-ignore - L est chargé
         const map = L.map('map').setView([45.1, 1.9], 10);
         mapRef.current = map;
 
@@ -106,13 +80,77 @@ export default function CartePage() {
 
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        console.error('Carte error:', err);
       } finally {
         setLoading(false);
       }
     }
 
+    function loadLeaflet(): Promise<void> {
+      // @ts-ignore - L est global
+      if (typeof L !== 'undefined') {
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve, reject) => {
+        // Vérifier si déjà en cours de chargement
+        if (document.getElementById('leaflet-script')) {
+          const check = setInterval(() => {
+            // @ts-ignore
+            if (typeof L !== 'undefined') {
+              clearInterval(check);
+              resolve();
+            }
+          }, 100);
+          setTimeout(() => {
+            clearInterval(check);
+            reject(new Error('Leaflet loading timeout'));
+          }, 5000);
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.id = 'leaflet-script';
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = () => {
+          // @ts-ignore
+          if (typeof L !== 'undefined') {
+            resolve();
+          } else {
+            reject(new Error('Leaflet not loaded after script onload'));
+          }
+        };
+        script.onerror = reject;
+        document.body.appendChild(script);
+
+        // Timeout de sécurité
+        setTimeout(() => {
+          reject(new Error('Leaflet script loading timeout'));
+        }, 5000);
+      });
+    }
+
+    function waitForMapElement(): Promise<void> {
+      return new Promise((resolve, reject) => {
+        let retries = 0;
+        const maxRetries = 50;
+        const interval = setInterval(() => {
+          const mapElement = document.getElementById('map');
+          if (mapElement) {
+            clearInterval(interval);
+            resolve();
+          } else if (retries >= maxRetries) {
+            clearInterval(interval);
+            reject(new Error('Map container not found after retries'));
+          }
+          retries++;
+        }, 50);
+      });
+    }
+
     // Charger Leaflet CSS
     const link = document.createElement('link');
+    link.id = 'leaflet-css';
     link.rel = 'stylesheet';
     link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
     document.head.appendChild(link);

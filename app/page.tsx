@@ -8,7 +8,7 @@ export default async function Page() {
 
   return (
     <main>
-      <h1>Communes sous-équipées en bornes de recharge</h1>
+      <h1>EVChargeSync — Communes sous-équipées en bornes de recharge</h1>
       <p className="muted">
         Détecteur de communes sous-équipées en IRVE — page d&apos;accueil provisoire
         (itération 1 : preuve que le pipeline de données fonctionne).

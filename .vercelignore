@@ -2,6 +2,8 @@ node_modules
 .next
 .git
 .vibe
+.vercel
+.env*
 data/cache
 data/*.duckdb
 data/*.duckdb.wal

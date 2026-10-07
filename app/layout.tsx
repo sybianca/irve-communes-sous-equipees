@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'IRVE — Communes sous-équipées',
+  title: 'EVChargeSync — Communes sous-équipées en IRVE',
   description:
-    'Détecteur de communes sous-équipées en bornes de recharge pour véhicules électriques (hackathon).',
+    'EVChargeSync — détecteur de communes sous-équipées en bornes de recharge pour véhicules électriques (hackathon).',
 };
 
 export default function RootLayout({

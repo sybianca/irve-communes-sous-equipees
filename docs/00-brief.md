@@ -17,9 +17,24 @@ comparateur chiffré. L'application tranche, chiffres à l'appui.
 
 ## Cible
 
-- Élue mobilité / direction des mobilités d'une intercommunalité (profil non technique).
-- Secondairement : maires, DGS, citoyens.
+- **Prioritaire (MVP) : le maire d'une commune rurale — décideur budgétaire**
+  (persona « Jean Dupont »). Il détient le budget, valide les investissements et doit
+  justifier chaque euro avec des données claires. Sans son adhésion, pas de déploiement.
+- Secondairement : élue mobilité / direction des mobilités d'une intercommunalité
+  (profil non technique), DGS, citoyens.
 - Contraintes : UI en français, sobre, orientée élu ; chiffres explicables et traçables.
+
+## Documents de cadrage du défi (ajoutés le 2026-10-07)
+
+- `docs/Personas_EVChargeSync.md` : personas du défi. **Décision produit** : le persona
+  prioritaire est Jean Dupont (maire, décideur budgétaire), pas Claire Morel (élue EPCI)
+  — voir `docs/20-decisions.md`.
+- `docs/EVChargeSync_Vision_Produit_original.md` : vision produit. Le produit s'appelle
+  **EVChargeSync**.
+- `docs/prd-aide-à-la-décision-recharge-ve-pour-collectivités.md` : PRD. Son périmètre
+  (F1–F7) est aligné avec les fonctionnalités ci-dessous : F2 = itération 1 (ingest),
+  F3 = itération 2 (sélection), F4 = itération 3 (carte), F5 = itération 4 (fiche
+  commune), F7 = itération 5 (simulateur), F6 = itération 6 (export).
 
 ## Stack (figée, ne pas changer sans mise à jour de `docs/20-decisions.md`)
 

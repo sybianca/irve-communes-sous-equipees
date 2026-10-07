@@ -18,3 +18,4 @@
 
 # outillage local (Vibe CLI)
 /.vibe/
+.vercel

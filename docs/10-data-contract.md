@@ -140,6 +140,23 @@ les sous-scores sont NULL, `score_equipement` = NULL.
 Interprétation : **plus le score est bas, plus la commune est sous-équipée**. Le
 classement des communes sous-équipées est le tri croissant du score (`rang_sous_equipe`).
 
+#### Seuils de lecture (affichage, PRD §4)
+
+En complément du score, l'indicateur brut `points_par_1000_hab` est affiché avec des
+seuils de lecture pour un décideur non technique (persona prioritaire : maire) :
+
+| `points_par_1000_hab` | Lecture |
+|---|---|
+| < 0,3 | Rouge — sous-équipée |
+| 0,3 – 0,6 | Orange — à surveiller |
+| > 0,6 | Vert — équipée |
+
+- Ces seuils sont une **couche de lisibilité** : le classement officiel reste le score
+  composite ci-dessus.
+- Seuils paramétrables envisagés en post-MVP (PRD §4).
+- Communes très peu peuplées : l'indicateur est instable (faibles effectifs) → à afficher
+  avec une mention de prudence (PRD §4).
+
 ## 6. Jeu de secours (`data/fallback/`, versionné)
 
 Si le réseau échoue à l'ingest, l'ETL repart des extraits bruts de la zone,

@@ -1,7 +1,8 @@
-import * as duckdb from '@duckdb/node-api';
-
 // Chemin de la base DuckDB (lecture seule au runtime, voir docs/10-data-contract.md).
 const DB_PATH = process.env.IRVE_DB_PATH ?? 'data/irve.duckdb';
+
+type DuckDB = typeof import('@duckdb/node-api');
+type DuckDBInstance = import('@duckdb/node-api').DuckDBInstance;
 
 export interface IngestStats {
   territoire: string;
@@ -13,12 +14,29 @@ export interface IngestStats {
 
 type Row = Record<string, unknown>;
 
+// Import dynamique mis en cache : si le binaire natif DuckDB ne charge pas
+// (fichiers natifs non déployés), on retombe sur null au lieu de faire planter la page.
+let duckdbModule: Promise<DuckDB | null> | null = null;
+
+function loadDuckdb(): Promise<DuckDB | null> {
+  if (!duckdbModule) {
+    duckdbModule = import('@duckdb/node-api').catch(() => null);
+  }
+  return duckdbModule;
+}
+
 /**
  * Ouvre la base DuckDB en lecture seule et retourne les compteurs de l'ingest.
- * Retourne null si la base n'existe pas (ingest pas encore lancé).
+ * Retourne null si la base n'existe pas (ingest pas encore lancé) ou si le
+ * binaire natif DuckDB n'est pas disponible.
  */
 export async function getIngestStats(): Promise<IngestStats | null> {
-  let instance: duckdb.DuckDBInstance;
+  const duckdb = await loadDuckdb();
+  if (!duckdb) {
+    return null;
+  }
+
+  let instance: DuckDBInstance;
   try {
     instance = await duckdb.DuckDBInstance.create(DB_PATH, { access_mode: 'read_only' });
   } catch {

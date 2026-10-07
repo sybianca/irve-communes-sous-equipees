@@ -1,0 +1,7 @@
+{
+  "epci_code": "200066751",
+  "epci_nom": "CC Xaintrie Val'Dordogne",
+  "date": "2026-10-07T19:11:29.351Z",
+  "url_irve": "https://static.data.gouv.fr/resources/base-nationale-des-irve-data-gouv-infrastructures-de-recharge-pour-vehicules-electriques-donnees-statiques/20261007-033608/consolidation-etalab-schema-irve-statique-v-2.3.1-20261007.csv",
+  "url_ve": "https://opendata.agenceore.fr/data-fair/api/v1/datasets/voitures-par-commune-par-energie/raw"
+}

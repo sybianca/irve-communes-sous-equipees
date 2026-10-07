@@ -549,13 +549,13 @@ async function main() {
     if (args.saveFallback) {
       console.log('\n[4/5] Génération du jeu de secours (data/fallback/)...');
       await ensureDir(FALLBACK_DIR);
-      execSync(`cp "${irveCsv}" "${path.join(FALLBACK_DIR, 'irve_zone.csv')}"`, { stdio: 'inherit' });
-      execSync(`cp "${veCsv}" "${path.join(FALLBACK_DIR, 've_ore_zone.csv')}"`, { stdio: 'inherit' });
+      await fs.copyFile(irveCsv, path.join(FALLBACK_DIR, 'irve_zone.csv'));
+      await fs.copyFile(veCsv, path.join(FALLBACK_DIR, 've_ore_zone.csv'));
       const communesJson = JSON.stringify(communesGeoJson);
       await fs.writeFile(path.join(FALLBACK_DIR, 'communes.geojson'), communesJson);
       const meta = { epci_code: args.epci, epci_nom: epciNom, date: now, url_irve: irveUrl, url_ve: veUrl };
       await fs.writeFile(path.join(FALLBACK_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
-      console.log('  ✓ Jeux de secours générés');
+      console.log('  ✓ Jeux de secours générés dans data/fallback/');
     }
 
     console.log('\n✅ Ingest terminé');

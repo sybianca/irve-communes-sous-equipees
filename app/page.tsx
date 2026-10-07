@@ -41,13 +41,25 @@ export default async function Page() {
           <p className="muted">
             Requête de preuve : <code>SELECT count(*) FROM bornes</code> → {stats.nbBornes}.
           </p>
-          <p>
-            <a href="/carte.html" style={{ display: 'inline-block', padding: '10px 20px', background: '#0066cc', color: 'white', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', marginTop: '10px' }}>
-              🗺️ Voir la carte des communes
-            </a>
-          </p>
         </>
       )}
+      
+      {/* LIEN TOUJOURS VISIBLE */}
+      <p style={{ marginTop: '20px' }}>
+        <a href="/carte" style={{ 
+          display: 'inline-block', 
+          padding: '12px 24px', 
+          background: '#0066cc', 
+          color: 'white', 
+          borderRadius: '8px', 
+          textDecoration: 'none', 
+          fontWeight: 'bold',
+          fontSize: '16px'
+        }}>
+          🗺️ Voir la carte des communes
+        </a>
+      </p>
+      
       <hr />
       <p className="muted">
         Prochaines itérations : sélection d&apos;une intercommunalité, tableau des communes,

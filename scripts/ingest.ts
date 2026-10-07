@@ -209,6 +209,9 @@ async function main() {
   console.log('\n[3/5] Nettoyage, agrégation, scoring et écriture (DuckDB)...');
   const instance = await duckdb.DuckDBInstance.create(DB_PATH);
   const conn = await instance.connect();
+  
+  // Variable pour le finally
+  let tempCommunes: string | undefined;
 
   try {
     await conn.run('INSTALL spatial');
@@ -550,7 +553,7 @@ async function main() {
       execSync(`cp "${veCsv}" "${path.join(FALLBACK_DIR, 've_ore_zone.csv')}"`, { stdio: 'inherit' });
       const communesJson = JSON.stringify(communesGeoJson);
       await fs.writeFile(path.join(FALLBACK_DIR, 'communes.geojson'), communesJson);
-      const meta = { epci_code: args.epci, epci_nom, date: now, url_irve: irveUrl, url_ve: veUrl };
+      const meta = { epci_code: args.epci, epci_nom: epciNom, date: now, url_irve: irveUrl, url_ve: veUrl };
       await fs.writeFile(path.join(FALLBACK_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
       console.log('  ✓ Jeux de secours générés');
     }
@@ -562,7 +565,9 @@ async function main() {
   } finally {
     conn.disconnectSync();
     instance.closeSync();
-    try { await fs.unlink(tempCommunes); } catch {}
+    if (tempCommunes) {
+      try { await fs.unlink(tempCommunes); } catch {}
+    }
   }
 }
 

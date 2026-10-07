@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte EVChargeSync - Communes sous-équipées</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        #header { padding: 10px; background: white; z-index: 1000; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #map { width: 100%; height: calc(100vh - 100px); }
+        .legend { display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-color { width: 20px; height: 20px; border: 1px solid #333; }
+        .color-red { background: #ff0000; }
+        .color-orange { background: #ffa500; }
+        .color-green { background: #008000; }
+        h1 { margin: 0 0 5px; color: #333; }
+        p { margin: 5px 0; color: #666; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>📍 Carte EVChargeSync - Communes sous-équipées en bornes de recharge</h1>
+        <p>CC Xaintrie Val'Dordogne (Corrèze) - Hackathon</p>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color color-red"></div>
+                <span>&lt; 0,3 (Sous-équipé)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-orange"></div>
+                <span>0,3 - 0,6 (À surveiller)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-green"></div>
+                <span>&gt; 0,6 (Bien équipé)</span>
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
+
+    <!-- GeoJSON intégré directement -->
+    <script>
+        const communesData = {
+            "type": "FeatureCollection",
+            "features": [
+                {"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[1.871311,45.12292],[1.870962,45.122889],[1.870178,45.122619],[1.869983,45.122459],[1.870123,45.121787],[1.869357,45.121697],[1.867777,45.1],[1.8676,45.120952],[1.866355,45.121089],[1.865457,45.121748],[1.864583,45.122395],[1.86371,45.123055],[1.862812,45.123703],[1.861958,45.124374],[1.861104,45.125022],[1.86025,45.125679],[1.859439,45.126348],[1.858627,45.127006],[1.857868,45.127697],[1.857108,45.128376],[1.8564,45.129098],[1.855714,45.129808],[1.85513,45.130547],[1.854566,45.131286],[1.854023,45.132013],[1.853532,45.132772],[1.85302,45.13352],[1.85254,45.134268],[1.852131,45.135029],[1.851689,45.135767],[1.85129,45.136492],[1.850891,45.137249],[1.850491,45.137983],[1.850134,45.138739],[1.849755,45.139495],[1.849377,45.140229],[1.84902,45.140962],[1.848685,45.141696],[1.848421,45.14243],[1.848084,45.143163],[1.84778,45.143918],[1.847444,45.144651],[1.847085,45.145383],[1.846758,45.14612],[1.846431,45.146845],[1.846082,45.147581],[1.845733,45.148328],[1.845385,45.149075],[1.845048,45.149823],[1.844701,45.150559],[1.844354,45.151295],[1.844038,45.152054],[1.843733,45.152789],[1.843438,45.153534],[1.843153,45.154267],[1.84289,45.155001],[1.84266,45.155746],[1.842397,45.156479],[1.842166,45.157212],[1.841935,45.157945],[1.841736,45.158688],[1.841569,45.159421],[1.841369,45.160164],[1.841168,45.160918],[1.840988,45.161651],[1.840797,45.162394],[1.840638,45.163125],[1.840456,45.163856],[1.840275,45.164598],[1.840146,45.165329],[1.839983,45.166069],[1.83983,45.166798],[1.839677,45.167536],[1.839556,45.168274],[1.839434,45.169012],[1.839313,45.169749],[1.839235,45.170497],[1.839189,45.171222],[1.83909,45.171947],[1.839024,45.172683],[1.838957,45.173419],[1.83889,45.174154],[1.838856,45.174889],[1.838855,45.175635],[1.838853,45.176369],[1.838884,45.177103],[1.838852,45.177848],[1.838853,45.178593],[1.838884,45.179326],[1.838948,45.180071],[1.838989,45.180816],[1.83903,45.181549],[1.839104,45.182292],[1.839177,45.183013],[1.839283,45.183745],[1.839326,45.184465],[1.839402,45.185196],[1.839511,45.185927],[1.839619,45.186658],[1.839728,45.187388],[1.839836,45.188119],[1.839977,45.188849],[1.840117,45.189579],[1.840195,45.190309],[1.840306,45.191049],[1.840417,45.191777],[1.840527,45.192516],[1.840638,45.193256],[1.840748,45.193974],[1.840858,45.194703],[1.840967,45.195431],[1.841077,45.196159],[1.841219,45.196898],[1.841338,45.197626],[1.841457,45.198354],[1.841577,45.199082],[1.841729,45.199821],[1.841879,45.200551],[1.841956,45.201281],[1.842066,45.202011],[1.842208,45.202741],[1.842349,45.203471],[1.842491,45.204202],[1.842632,45.204932],[1.842773,45.205662],[1.842915,45.206392]]}],"properties":{"code_insee":"19010","commune":"Argentat-sur-Dordogne","population":2900,"nb_points_charge":15,"points_par_1000_hab":5.172413793103448,"kw_par_1000_hab":null,"score_equipement":2.76,"rang_sous_equipe":1}}
+            ]
+        };
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Attendre que le DOM et Leaflet soient prêts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attendre que Leaflet soit chargé
+            function waitForLeaflet(callback, maxTries, interval) {
+                var tries = 0;
+                var check = setInterval(function() {
+                    tries++;
+                    if (typeof L !== 'undefined') {
+                        clearInterval(check);
+                        callback();
+                    } else if (tries >= maxTries) {
+                        clearInterval(check);
+                        console.error('Leaflet failed to load');
+                    }
+                }, interval);
+            }
+
+            waitForLeaflet(function() {
+                // Initialiser la carte
+                var map = L.map('map').setView([45.1, 1.9], 10);
+
+                // Ajouter la couche OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Style des communes
+                function getColor(points) {
+                    if (points === null || points === undefined) return '#cccccc';
+                    if (points < 0.3) return '#ff0000';
+                    if (points <= 0.6) return '#ffa500';
+                    return '#008000';
+                }
+
+                // Ajouter les communes à la carte
+                L.geoJSON(communesData, {
+                    style: function(feature) {
+                        return {
+                            fillColor: getColor(feature.properties.points_par_1000_hab),
+                            fillOpacity: 0.6,
+                            color: '#333',
+                            weight: 1,
+                            opacity: 1
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        var props = feature.properties;
+                        var popupContent = '<b>' + (props.commune || 'N/A') + '</b><br>' +
+                            'Code INSEE: ' + (props.code_insee || 'N/A') + '<br>' +
+                            'Population: ' + (props.population || 'N/A') + '<br>' +
+                            'Points/1000 hab: ' + (props.points_par_1000_hab ? props.points_par_1000_hab.toFixed(2) : 'N/A') + '<br>' +
+                            'Score: ' + (props.score_equipement ? props.score_equipement.toFixed(2) : 'N/A') + '<br>' +
+                            'Rang: ' + (props.rang_sous_equipe || 'N/A');
+                        layer.bindPopup(popupContent);
+                    }
+                }).addTo(map);
+
+                // Zoomer sur les données
+                map.fitBounds(L.geoJSON(communesData).getBounds());
+
+            }, 20, 200);
+        });
+    </script>
+</body>
+</html>

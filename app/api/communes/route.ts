@@ -1,24 +1,31 @@
 import { NextResponse } from 'next/server';
+import { getCommunesWithGeometry } from '@/lib/db';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-// Sur Vercel, on utilise toujours le fallback car DuckDB n'est pas disponible
-// (pas de filesystem persistant, pas de binaires natifs)
 const FALLBACK_PATH = path.join(process.cwd(), 'data', 'fallback', 'communes_indicateurs.geojson');
 
 export async function GET() {
   try {
-    // Lire directement le fallback (toujours disponible sur Vercel)
-    const data = JSON.parse(await fs.readFile(FALLBACK_PATH, 'utf8'));
-    return NextResponse.json(data);
+    // 1. Essayer la base DuckDB locale d'abord
+    const communes = await getCommunesWithGeometry();
+    if (communes) {
+      return NextResponse.json(communes);
+    }
+
+    // 2. Sinon, utiliser le fallback statique
+    try {
+      const data = JSON.parse(await fs.readFile(FALLBACK_PATH, 'utf8'));
+      return NextResponse.json(data);
+    } catch (fallbackError) {
+      return NextResponse.json(
+        { error: 'No data available. Run `npm run ingest --save-fallback` first.' },
+        { status: 404 }
+      );
+    }
   } catch (error) {
-    console.error('Fallback error:', error);
     return NextResponse.json(
-      { 
-        error: 'No data available',
-        hint: 'Fallback file missing: ' + FALLBACK_PATH,
-        cwd: process.cwd()
-      },
+      { error: 'Failed to load communes', details: String(error) },
       { status: 500 }
     );
   }

@@ -12,6 +12,18 @@ export interface IngestStats {
   dateIngest: string;
 }
 
+export interface CommuneWithGeometry {
+  code_insee: string;
+  commune: string;
+  population: number;
+  nb_points_charge: number | null;
+  points_par_1000_hab: number | null;
+  kw_par_1000_hab: number | null;
+  score_equipement: number | null;
+  rang_sous_equipe: number | null;
+  geom: unknown; // GeoJSON geometry
+}
+
 type Row = Record<string, unknown>;
 
 // Import dynamique mis en cache : si le binaire natif DuckDB ne charge pas
@@ -23,6 +35,69 @@ function loadDuckdb(): Promise<DuckDB | null> {
     duckdbModule = import('@duckdb/node-api').catch(() => null);
   }
   return duckdbModule;
+}
+
+/**
+ * Ouvre la base DuckDB en lecture seule et retourne les communes avec géométrie.
+ * Retourne null si la base n'existe pas ou si le binaire natif DuckDB n'est pas disponible.
+ */
+export async function getCommunesWithGeometry(): Promise<GeoJSON.FeatureCollection | null> {
+  const duckdb = await loadDuckdb();
+  if (!duckdb) {
+    return null;
+  }
+
+  let instance: DuckDBInstance;
+  try {
+    instance = await duckdb.DuckDBInstance.create(DB_PATH, { access_mode: 'read_only' });
+  } catch {
+    return null;
+  }
+
+  const connection = await instance.connect();
+  try {
+    // Récupérer les communes avec leur géométrie et indicateurs
+    const result = await connection.runAndReadAll(`
+      SELECT 
+        code_insee,
+        commune,
+        population,
+        nb_points_charge,
+        points_par_1000_hab,
+        kw_par_1000_hab,
+        score_equipement,
+        rang_sous_equipe,
+        ST_AsGeoJSON(geom) as geom_json
+      FROM communes_indicateurs
+    `);
+
+    const features: GeoJSON.Feature[] = [];
+    for (const row of result.getRowObjects() as Row[]) {
+      const geom = row.geom_json ? JSON.parse(String(row.geom_json)) : null;
+      features.push({
+        type: 'Feature',
+        geometry: geom,
+        properties: {
+          code_insee: row.code_insee,
+          commune: row.commune,
+          population: row.population,
+          nb_points_charge: row.nb_points_charge,
+          points_par_1000_hab: row.points_par_1000_hab,
+          kw_par_1000_hab: row.kw_par_1000_hab,
+          score_equipement: row.score_equipement,
+          rang_sous_equipe: row.rang_sous_equipe,
+        },
+      });
+    }
+
+    return {
+      type: 'FeatureCollection',
+      features,
+    };
+  } finally {
+    connection.disconnectSync();
+    instance.closeSync();
+  }
 }
 
 /**

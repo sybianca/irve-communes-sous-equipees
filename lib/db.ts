@@ -56,6 +56,10 @@ export async function getCommunesWithGeometry(): Promise<GeoJSON.FeatureCollecti
 
   const connection = await instance.connect();
   try {
+    // Charger l'extension spatiale pour ST_AsGeoJSON
+    await connection.run('INSTALL spatial');
+    await connection.run('LOAD spatial');
+
     // Récupérer les communes avec leur géométrie et indicateurs
     const result = await connection.runAndReadAll(`
       SELECT 

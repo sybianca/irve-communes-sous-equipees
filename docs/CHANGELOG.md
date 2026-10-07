@@ -40,7 +40,11 @@
 
 ### Ce qui marche
 
-- (à compléter en fin d'itération)
+- Script `npm run ingest` **opérationnel** : télécharge les sources (API Géo pour EPCI/communes, data.gouv.fr pour IRVE, Agence ORE pour VE), nettoie les données (coordonnées valides, zone EPCI + tampon 40 km, dédoublonnage, jointure spatiale pour code INSEE), calcule les indicateurs (points/1000 hab, kW/1000 hab, kW/VE, distance hors commune), calcule le score composite (percentiles + pondérations 0,40/0,30/0,20/0,10), écrit la base DuckDB (`data/irve.duckdb`)
+- **Territoire test validé** : CC Xaintrie Val'Dordogne (200066751, 30 communes) → 1 058 points de charge dans la zone (bbox + tampon 40 km), 30 communes dans `communes_indicateurs`, tables `bornes`/`communes_indicateurs`/`meta` conformes au contrat
+- Page d'accueil **pré-teintée** : affiche le nombre de communes et de bornes chargées (preuve que le pipeline fonctionne), repli gracieux si base non chargée
+- **Correction majeure** : `consolidated_is_lon_lat_correct=False` = « non vérifié » (et non invalide) → maintien des lignes avec coordonnées valides, évitant la perte de 50 % des stations réelles (documenté dans `docs/10-data-contract.md` et `docs/20-decisions.md`)
+- **Calcul de bbox** : l'API Géo ne retournant pas de bbox pour les EPCI, calcul de la bbox à partir des contours des communes (corrigé dans `scripts/ingest.ts`)
 
 ### Ce qui reste
 

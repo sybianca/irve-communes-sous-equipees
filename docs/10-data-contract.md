@@ -96,8 +96,11 @@ nettoyage applicatif ajoute :
 1. **Zone** : coordonnées dans la bbox territoire + tampon 40 km.
 2. **Coordonnées valides** : `consolidated_longitude` / `consolidated_latitude` (à défaut,
    parsing de `coordonneesXY` au format `[lon, lat]`) ; lat ∈ [41, 51,5],
-   lon ∈ [-5,5, 9,9] (France métropolitaine + Corse) ; exclusion si
-   `consolidated_is_lon_lat_correct` = False.
+   lon ∈ [-5,5, 9,9] (France métropolitaine + Corse). `consolidated_is_lon_lat_correct` = False
+   signifie **« non vérifié »** (et non « invalide »). **Règle retenue** : on exclut uniquement
+   si les coordonnées sont non parsables, hors de France, ou hors de la zone chargée
+   (bbox territoire + tampon). Garder ces lignes évite de perdre des stations réelles
+   (ex. ALDI, ChargeGuru, Zephyre, QOVOLTIS sur le territoire test).
 3. **Doublons** : dédoublonnage par `id_pdc_itinerance` (1 ligne = 1 point de charge) ;
    à défaut, par empreinte de la ligne (doublons exacts).
 4. **Station** : identifiant `id_station_itinerance` si renseigné (hors « Non concerné »),
@@ -106,6 +109,12 @@ nettoyage applicatif ajoute :
    NULL (le point reste compté, hors puissance).
 6. **Accès public** : la source étant la consolidation « ouvertes au public », aucune
    exclusion supplémentaire n'est appliquée en itération 1 (voir limites).
+7. **Code INSEE** : quand le champ `code_insee` est absent, la commune est déterminée
+   par jointure spatiale (`ST_Contains`) avec les contours des communes (API Géo).
+8. **Assignation à une seule commune** : si une borne est contenue dans plusieurs
+   contours (chevauchements des contours API Géo, ex. 26 paires / 24 points distincts
+   observés), elle est assignée à **UNE SEULE** commune (la première trouvée par ordre
+   alphabétique du code INSEE).
 
 ## 5. Score composite (0–100)
 
